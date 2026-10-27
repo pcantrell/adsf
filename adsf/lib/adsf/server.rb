@@ -9,12 +9,14 @@ module Adsf
       port: 3000,
       index_filenames: ['index.html'],
       auto_extensions: [],
+      global_response_override: ->(env) { nil },
       handler: nil
     )
       @root = root
       @live = live
       @index_filenames = index_filenames
       @auto_extensions = auto_extensions
+      @global_response_override = global_response_override
       @host = host
       @port = port
       @handler = handler
@@ -28,6 +30,7 @@ module Adsf
         root: @root,
         index_filenames: @index_filenames,
         auto_extensions: @auto_extensions,
+        global_response_override: @global_response_override,
       )
       start_watcher if @live
 
@@ -69,7 +72,7 @@ module Adsf
       server.stop
     end
 
-    def build_app(root:, index_filenames:, auto_extensions:)
+    def build_app(root:, index_filenames:, auto_extensions:, global_response_override:)
       is_live = @live
 
       ::Rack::Builder.new do
@@ -90,6 +93,9 @@ module Adsf
           require 'adsf/live'
           use ::Rack::LiveReload, no_swf: true, source: :vendored
         end
+
+        use Adsf::Rack::GlobalResponseOverride,
+            callback: global_response_override
 
         run ::Rack::Files.new(root)
       end.to_app
