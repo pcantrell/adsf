@@ -13,15 +13,15 @@ class Adsf::Live::WatcherTest < Minitest::Test
 
     begin
       watcher.start
-      yield
+      yield watcher
     ensure
       watcher.stop
     end
   end
 
   def test_receives_hello
-    run_watcher do
-      ws = Faye::WebSocket::Client.new('ws://127.0.0.1:35729/')
+    run_watcher do |watcher|
+      ws = Faye::WebSocket::Client.new("ws://127.0.0.1:#{watcher.port}/")
 
       queue = SizedQueue.new(2)
       ws.on :open do |_event|
@@ -52,8 +52,8 @@ class Adsf::Live::WatcherTest < Minitest::Test
   end
 
   def test_receives_update
-    run_watcher do
-      ws = Faye::WebSocket::Client.new('ws://127.0.0.1:35729/')
+    run_watcher do |watcher|
+      ws = Faye::WebSocket::Client.new("ws://127.0.0.1:#{watcher.port}/")
 
       queue = SizedQueue.new(2)
       ws.on :open do |_event|

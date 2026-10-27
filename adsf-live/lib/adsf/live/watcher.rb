@@ -10,7 +10,10 @@ module Adsf
 
         @root_dir = root_dir
         @watch_files = watch_files
+        @port = self.class.find_open_port
       end
+
+      attr_reader :port
 
       def start
         @server = start_server
@@ -29,7 +32,7 @@ module Adsf
       def start_server
         ::Adsf::Live::WebSocketServer.new(
           host: '0.0.0.0',
-          port: '35729',
+          port: @port.to_s,
         )
       end
 
@@ -51,6 +54,22 @@ module Adsf
         prefix_length = @root_dir.length
         paths = chs.map { |pa| pa[prefix_length..-1] }
         server.reload(paths)
+      end
+
+    private
+
+      def self.find_open_port
+        100.times do
+          port = rand(49152..65535)
+          begin
+            # check whether port is available
+            TCPServer.new('0.0.0.0', port).close
+            return port
+          rescue Errno::EADDRINUSE
+            # in use; try another port
+          end
+        end
+        raise "Could not find an open port for live reload web socket"
       end
     end
   end

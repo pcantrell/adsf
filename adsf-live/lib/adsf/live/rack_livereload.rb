@@ -5,7 +5,6 @@ module Rack
     LIVERELOAD_JS_PATH = '/__rack/livereload.js'
     VENDORED_JS_PATH = "#{__dir__}/../../../vendor/livereload.js"
     HEAD_TAG_REGEX = /<head( [^<]+)?>/.freeze
-    LIVERELOAD_PORT = 35_729
     LIVERELOAD_SCHEME = 'ws'
 
     def initialize(app, options = {})
@@ -58,9 +57,10 @@ module Rack
     end
 
     def template
+      raise "Missing live_reload_port" unless @options[:live_reload_port]
       <<~HTML
         <script>
-          RACK_LIVERELOAD_PORT = #{@options[:live_reload_port] || LIVERELOAD_PORT}
+          RACK_LIVERELOAD_PORT = #{@options[:live_reload_port]}
           RACK_LIVERELOAD_SCHEME = "#{@options[:live_reload_scheme] || LIVERELOAD_SCHEME}"
         </script>
         <script defer src="#{livereload_source}?host=#{host_to_use}"></script>

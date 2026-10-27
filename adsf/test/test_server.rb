@@ -25,7 +25,7 @@ class Adsf::Test::Server < Minitest::Test
       break
     end
 
-    yield
+    yield server
   ensure
     server.stop
     thread.join
@@ -187,12 +187,12 @@ class Adsf::Test::Server < Minitest::Test
   end
 
   def run_live_server
-    run_server(live: true) { yield }
+    run_server(live: true) { |server| yield server }
   end
 
   def test_receives_update
-    run_live_server do
-      ws = Faye::WebSocket::Client.new('ws://127.0.0.1:35729/')
+    run_live_server do |server|
+      ws = Faye::WebSocket::Client.new("ws://127.0.0.1:#{server.watcher.port}/")
 
       sleep 0.2
       FileUtils.mkdir_p('output')
