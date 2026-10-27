@@ -7,6 +7,7 @@ lib/adsf/rack.rb
 lib/adsf/rack/auto_file_extensions.rb
 lib/adsf/rack/caching.rb
 lib/adsf/rack/cors.rb
+lib/adsf/rack/global_response_override.rb
 lib/adsf/rack/index_file_finder.rb
 lib/adsf/server.rb
 lib/adsf/version.rb
