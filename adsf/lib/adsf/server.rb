@@ -22,14 +22,16 @@ module Adsf
       @q = SizedQueue.new(1)
     end
 
+    attr_reader :watcher
+
     def run
       handler = build_handler
+      start_watcher if @live
       app = build_app(
         root: @root,
         index_filenames: @index_filenames,
         auto_extensions: @auto_extensions,
       )
-      start_watcher if @live
 
       url = "http://#{@host}:#{@port}/"
       puts "View the site at #{url}"
@@ -61,7 +63,7 @@ module Adsf
     end
 
     def build_app(root:, index_filenames:, auto_extensions:)
-      is_live = @live
+      live_reload_port = @watcher.port if @watcher
 
       ::Rack::Builder.new do
         use ::Rack::CommonLogger
@@ -77,9 +79,8 @@ module Adsf
             root: root,
             extensions: auto_extensions
 
-        if is_live
-          require 'adsf/live'
-          use ::Rack::LiveReload, no_swf: true, source: :vendored
+        if live_reload_port
+          use ::Rack::LiveReload, no_swf: true, source: :vendored, live_reload_port:
         end
 
         run ::Rack::Files.new(root)
